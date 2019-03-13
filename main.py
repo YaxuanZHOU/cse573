@@ -45,7 +45,7 @@ def main():
 
     if args.enable_logging:
         from tensorboardX import SummaryWriter
-        log_dir =  'runs/' + args.title + '-' + local_start_time_str
+        log_dir = 'runs/' + args.title + '-' + local_start_time_str
         log_writer = SummaryWriter(log_dir=log_dir)
 
     if args.gpu_ids == -1:
