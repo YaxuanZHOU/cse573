@@ -84,8 +84,8 @@ class Model(torch.nn.Module):
         # YZ:
         additional_state_info = state[1]    # memory part of the state
         additional_score = self.augmented_linear(additional_state_info)
-        print("YZ test: =========== x size: ", x.size())
-        print("YZ test: =========== addition size: ", additional_score.size())
+        # print("YZ test: =========== x size: ", x.size())
+        # print("YZ test: =========== addition size: ", additional_score.size())
         augmented_x = self.augmented_combination(torch.cat([x, additional_score], dim=1))
 
         return augmented_x
