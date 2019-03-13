@@ -29,8 +29,6 @@ class Episode:
             rec_objects = [s.strip() for s in f.readlines()]
         
         self.objects = int_objects + rec_objects
-        self.targets_found = []     # YZ-add memory for network-found targets within current episode.
-        self.targets_done = []      # YZ-add memory for really-found targets within current episode.
 
         self.actions_list = [{'action':a} for a in BASIC_ACTIONS]
         self.actions_taken = []
@@ -41,7 +39,12 @@ class Episode:
         return self._env
 
     def state_for_agent(self):
-        return [self.environment.current_frame, self.targets_found]     # YZ: add network-found memory into the state space.
+        # YZ: add network-found memory into the state space.
+        memory = [0.0, 0.0]
+        for i in range(len(self.target)):
+            if self.target[i] in self.targets_found:
+                memory[i] = 1.0
+        return [self.environment.current_frame, memory]
 
     def step(self, action_as_int):
         action = self.actions_list[action_as_int]
@@ -69,7 +72,7 @@ class Episode:
         done = False
         action_was_successful = self.environment.last_action_success
 
-        if action['action'] == range(len(self.target)-1):
+        if action['action'] in range(len(self.target)):
             target_index = action['action']
             # YZ: add (what network thinks) found target in memory
             if self.target[target_index] not in self.targets_found:
@@ -80,8 +83,9 @@ class Episode:
             visible_objects = [o['objectType'] for o in objects if o['visible']]
             # YZ-comment: visible objects in current frame of the environment, eg. ['Cup','Bowl']
             if self.target[target_index] in visible_objects:
-                self.targets_done.append(self.target[target_index])
-                reward += GOAL_SUCCESS_REWARD
+                if self.target[target_index] not in self.targets_done:
+                    self.targets_done.append(self.target[target_index])
+                    reward += GOAL_SUCCESS_REWARD
 
             # YZ: if all targets have been network-found
             if len(self.target) == len(self.targets_found):
@@ -112,8 +116,12 @@ class Episode:
 
         # For now, single target.
         self.target = ['Tomato', 'Bowl']    # YZ-revised from: self.target = 'Tomato'
+
         self.success = False
         self.cur_scene = scene
         self.actions_taken = []
-        
+
+        self.targets_found = []     # YZ-add memory for network-found targets within current episode.
+        self.targets_done = []      # YZ-add memory for really-found targets within current episode.
+
         return True
