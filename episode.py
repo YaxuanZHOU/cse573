@@ -29,16 +29,19 @@ class Episode:
             rec_objects = [s.strip() for s in f.readlines()]
         
         self.objects = int_objects + rec_objects
+        self.targets_found = []     # YZ-add memory for network-found targets within current episode.
+        self.targets_done = []      # YZ-add memory for really-found targets within current episode.
 
         self.actions_list = [{'action':a} for a in BASIC_ACTIONS]
         self.actions_taken = []
+
 
     @property
     def environment(self):
         return self._env
 
     def state_for_agent(self):
-        return self.environment.current_frame
+        return [self.environment.current_frame, self.targets_found]     # YZ: add network-found memory into the state space.
 
     def step(self, action_as_int):
         action = self.actions_list[action_as_int]
@@ -66,12 +69,25 @@ class Episode:
         done = False
         action_was_successful = self.environment.last_action_success
 
-        if action['action'] == 'Done':
-            done = True
+        if action['action'] == range(len(self.target)-1):
+            target_index = action['action']
+            # YZ: add (what network thinks) found target in memory
+            if self.target[target_index] not in self.targets_found:
+                self.targets_found.append(self.target[target_index])
+
+            # YZ: add (what is really) found target in memory
             objects = self._env.last_event.metadata['objects']
             visible_objects = [o['objectType'] for o in objects if o['visible']]
-            if self.target in visible_objects:
+            # YZ-comment: visible objects in current frame of the environment, eg. ['Cup','Bowl']
+            if self.target[target_index] in visible_objects:
+                self.targets_done.append(self.target[target_index])
                 reward += GOAL_SUCCESS_REWARD
+
+            # YZ: if all targets have been network-found
+            if len(self.target) == len(self.targets_found):
+                done = True
+            # YZ: if all targets have been really-found
+            if len(self.target) == len(self.targets_done):
                 self.success = True
 
         return reward, done, action_was_successful
@@ -95,7 +111,7 @@ class Episode:
             self._env.reset(scene)
 
         # For now, single target.
-        self.target = 'Tomato'
+        self.target = ['Tomato', 'Bowl']    # YZ-revised from: self.target = 'Tomato'
         self.success = False
         self.cur_scene = scene
         self.actions_taken = []

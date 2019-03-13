@@ -35,6 +35,13 @@ class Model(torch.nn.Module):
         self.conv4 = nn.Conv2d(64, 64, 3, stride=1, padding=1)
         self.maxp4 = nn.MaxPool2d(2, 2)
 
+        # YZ- begin:
+        additional_state_size = 2
+        augmented_hidden_size = 10
+        self.augmented_linear = nn.Linear(additional_state_size, augmented_hidden_size)
+        self.augmented_combination = nn.Linear(1024 + augmented_hidden_size, 1024)
+        # YZ- end
+
         self.lstm = nn.LSTMCell(1024, args.hidden_state_sz)
         self.critic_linear = nn.Linear(args.hidden_state_sz, 1)
         self.actor_linear = nn.Linear(args.hidden_state_sz, args.action_space)
@@ -58,13 +65,18 @@ class Model(torch.nn.Module):
         self.train()
 
     def embedding(self, state):
-        x = F.relu(self.maxp1(self.conv1(state)))
+        x = F.relu(self.maxp1(self.conv1(state[0])))
         x = F.relu(self.maxp2(self.conv2(x)))
         x = F.relu(self.maxp3(self.conv3(x)))
         x = F.relu(self.maxp4(self.conv4(x)))
 
-        x = x.view(x.size(0), -1)
-        return x
+        x = x.view(x.size(0), -1)   # YZ-comment: flatten the input to a 1-d tensor
+
+        # YZ:
+        additional_state_info = state[1]    # memory part of the state
+        additional_score = self.augmented_linear(additional_state_info)
+        augmented_x = self.augmented_combination(torch.cat([x, additional_score]))
+        return augmented_x
 
     def a3clstm(self, x, hidden):
         hx, cx = self.lstm(x, hidden)
