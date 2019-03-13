@@ -37,7 +37,7 @@ class Model(torch.nn.Module):
 
         # YZ- begin:
         additional_state_size = 2
-        augmented_hidden_size = 1024
+        augmented_hidden_size = 10
         self.augmented_linear = nn.Linear(additional_state_size, augmented_hidden_size)
         self.augmented_combination = nn.Linear(1024 + augmented_hidden_size, 1024)
         # YZ- end
@@ -52,6 +52,15 @@ class Model(torch.nn.Module):
         self.conv2.weight.data.mul_(relu_gain)
         self.conv3.weight.data.mul_(relu_gain)
         self.conv4.weight.data.mul_(relu_gain)
+        # YZ- begin:
+        self.augmented_linear.weight.data = norm_col_init(
+            self.augmented_linear.weight.data, 0.01)
+        self.augmented_linear.bias.data.fill_(0)
+        self.augmented_combination.weight.data = norm_col_init(
+            self.augmented_combination.weight.data, 0.01)
+        self.augmented_combination.bias.data.fill_(0)
+        # YZ- end
+
         self.actor_linear.weight.data = norm_col_init(
             self.actor_linear.weight.data, 0.01)
         self.actor_linear.bias.data.fill_(0)
