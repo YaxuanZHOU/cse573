@@ -4,7 +4,7 @@ import time
 import setproctitle
 import random
 import os
-
+import time
 import torch
 from torch.autograd import Variable
 
@@ -113,6 +113,7 @@ def test(rank, args, create_shared_model, shared_model,
             # Run episode for num_steps or until player is done.
             for _ in range(args.num_steps):
                 player.action(training=False)
+                time.sleep(0.2)
                 total_reward = total_reward + player.reward
                 if player.done:
                     break
@@ -138,7 +139,7 @@ def new_episode(args, player, scene):
     player.done = False
 
 def new_episode_w_replay(args, player, scene):
-    player.episode.slow_replay()
+    # player.episode.slow_replay()
     player.episode.new_episode(args, scene)
     player.reset_hidden()
     player.done = False
