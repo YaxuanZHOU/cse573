@@ -9,7 +9,6 @@ import numpy as np
 
 from ai2thor.controller import Controller
 
-
 class Environment:
     """ Abstraction of the ai2thor enviroment. """
 
@@ -49,10 +48,12 @@ class Environment:
     def last_action_success(self):
         return self.controller.last_event.metadata['lastActionSuccess']
 
+
     def object_is_visible(self, objId):
         objects = self.last_event.metadata['objects']
         visible_objects = [o['objectId'] for o in objects if o['visible']]
         return objId in visible_objects
+
 
     def start(self, scene_name, gpu_id):
         """ Begin the scene. """
@@ -60,12 +61,12 @@ class Environment:
         self.controller.start()
         self.controller.step({'action': 'ChangeQuality', 'quality': 'Very Low'})
         self.controller.step(
-            {
-                "action": "ChangeResolution",
-                "x": 224,
-                "y": 224,
-            }
-        )
+                {
+                    "action": "ChangeResolution",
+                    "x": 224,
+                    "y": 224,
+                }
+            )
 
         self.controller.reset(scene_name)
         self.controller.step(dict(action='Initialize', gridSize=self.grid_size, fieldOfView=self.fov))
@@ -73,8 +74,8 @@ class Environment:
         self.controller.step(dict(action='ToggleHideAndSeekObjects'))
         self.randomize_agent_location()
         self.seed = 0
-        self.controller.step(
-            dict(action='InitialRandomSpawn', forceVisible=True, maxNumRepeats=10, randomSeed=self.seed))
+        self.controller.step(dict(action='InitialRandomSpawn', forceVisible=True, maxNumRepeats=10, randomSeed=self.seed))
+
 
     def reset(self, scene_name, change_seed=True):
         """ Reset the scene. """
@@ -89,16 +90,14 @@ class Environment:
         self.controller.step(dict(action='ToggleHideAndSeekObjects'))
         if change_seed and self.randomize_objects:
             self.seed = random.randint(0, 1000000)
-            self.controller.step(
-                dict(action='InitialRandomSpawn', forceVisible=True, maxNumRepeats=10, randomSeed=self.seed))
+            self.controller.step(dict(action='InitialRandomSpawn', forceVisible=True, maxNumRepeats=10, randomSeed=self.seed))
         else:
-            self.controller.step(
-                dict(action='InitialRandomSpawn', forceVisible=True, maxNumRepeats=10, randomSeed=self.seed))
+            self.controller.step(dict(action='InitialRandomSpawn', forceVisible=True, maxNumRepeats=10, randomSeed=self.seed))
 
-    def all_objects(self):
+    def all_objects(self): 
         objects = self.controller.last_event.metadata['objects']
         return [o['objectId'] for o in objects]
-
+    
     def fail(self):
         self.controller.last_event.metadata['lastActionSuccess'] = False
         return self.controller.last_event
@@ -106,8 +105,7 @@ class Environment:
     def step(self, action_dict):
         curr_state = ThorAgentState.get_state_from_evenet(event=self.controller.last_event, forced_y=self.y)
         next_state = get_next_state(curr_state, action_dict['action'], copy_state=True)
-        if action_dict['action'] in ['LookUp', 'LookDown', 'RotateLeft', 'RotateRight', 'MoveAhead', 'FoundTomato',
-                                     'FoundMicrowave']:
+        if action_dict['action'] in ['LookUp', 'LookDown', 'RotateLeft', 'RotateRight', 'MoveAhead']:
             if next_state is None:
                 self.last_event.metadata['lastActionSuccess'] = False
             else:
@@ -120,32 +118,11 @@ class Environment:
 
                 if not (s1 and s2 and s3):
                     # Go back to previous state.
-                    self.teleport_agent_to(curr_state.x, curr_state.y, curr_state.z, curr_state.rotation,
-                                           curr_state.horizon)
+                    self.teleport_agent_to(curr_state.x, curr_state.y, curr_state.z, curr_state.rotation, curr_state.horizon)
                     self.last_event.metadata['lastActionSuccess'] = False
-        elif action_dict['action'] not in [0, 1]:  # YZ
+        elif action_dict['action'] not in [0, 1]:     # YZ
             return self.controller.step(action_dict)
         # YZ- comment: do nothing when action is "done"
-
-    ## begin
-    def tomatoEnvSuccess(self, tomato_id):
-        event = self.controller.step(dict(action='PickupObject', objectId=tomato_id), raise_for_failure=True)
-        s = event.metadata['lastActionSuccess']
-        return s
-
-    def microwaveEnvSuccess(self, microwave_id, tomato_id):
-        event = self.controller.step(dict(action='OpenObject', objectId=microwave_id), raise_for_failure=True)
-        s1 = event.metadata['lastActionSuccess']
-        event = self.controller.step(dict(action='PlaceHeldObject', objectId=tomato_id), raise_for_failure=True)
-        s2 = event.metadata['lastActionSuccess']
-        event = self.controller.step(dict(action='CloseObject', objectId=microwave_id), raise_for_failure=True)
-        s3 = event.metadata['lastActionSuccess']
-        if (s1 and s2 and s3):
-            return True
-        else:
-            return False
-
-    ## end
 
     def teleport_agent_to(self, x, y, z, rotation, horizon):
         """ Teleport the agent to (x,y,z) with given rotation and horizon. """
@@ -185,13 +162,13 @@ class Environment:
 class ThorAgentState:
     """ Representation of a simple state of a Thor Agent which includes
         the position, horizon and rotation. """
-
     def __init__(self, x, y, z, rotation, horizon):
         self.x = round(x, 2)
         self.y = y
         self.z = round(z, 2)
         self.rotation = round(rotation)
         self.horizon = round(horizon)
+
 
     @classmethod
     def get_state_from_evenet(cls, event, forced_y=None):
@@ -212,11 +189,11 @@ class ThorAgentState:
             For now we consider this 'close enough'. """
         if isinstance(other, ThorAgentState):
             return (
-                    self.x == other.x and
-                    # self.y == other.y and
-                    self.z == other.z and
-                    self.rotation == other.rotation and
-                    self.horizon == other.horizon
+                self.x == other.x and
+                # self.y == other.y and
+                self.z == other.z and
+                self.rotation == other.rotation and
+                self.horizon == other.horizon
             )
         return NotImplemented
 
