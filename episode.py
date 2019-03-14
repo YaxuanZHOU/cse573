@@ -103,7 +103,7 @@ class Episode:
         return reward, done, action_was_successful
 
     def new_episode(self, args, scene):
-        # time.sleep(1)
+        time.sleep(3)
         if self._env is None:
             if args.arch == 'osx':
                 local_executable_path = './datasets/builds/thor-local-OSXIntel64.app/Contents/MacOS/thor-local-OSXIntel64'
