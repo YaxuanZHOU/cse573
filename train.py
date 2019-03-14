@@ -33,6 +33,7 @@ def train(rank, args, create_shared_model, shared_model,
         # Start a new episode.
         total_reward = 0
         player.eps_len = 0
+
         new_episode(args, player, scene)
 
         while not player.done:
@@ -95,14 +96,17 @@ def test(rank, args, create_shared_model, shared_model,
         torch.cuda.manual_seed(args.seed + rank)
 
     player = initialize_agent(create_shared_model, args, rank, gpu_id=gpu_id)
-
+    i_for_replay = 0
     while not end_flag.value:
-
+        i_for_replay = 0
         # Start a new episode.
         total_reward = 0
         player.eps_len = 0
-        new_episode(args, player, scene)
-
+        # new_episode(args, player, scene)
+        if i_for_replay > 1:
+            new_episode_w_replay(args, player, scene)
+        else:
+            new_episode(args, player, scene)
         while not player.done:
             # Make sure model is up to date.
             player.sync_with_shared(shared_model)
@@ -131,7 +135,13 @@ def test(rank, args, create_shared_model, shared_model,
 def new_episode(args, player, scene):
     player.episode.new_episode(args, scene)
     player.reset_hidden()
-    player.done = False 
+    player.done = False
+
+def new_episode_w_replay(args, player, scene):
+    player.episode.slow_replay()
+    player.episode.new_episode(args, scene)
+    player.reset_hidden()
+    player.done = False
 
 def log_episode(player, res_queue, **kwargs):
     results = {
