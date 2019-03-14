@@ -16,7 +16,7 @@ STEP_PENALTY = -0.01
 FAILED_ACTION_PENALTY = 0
 
 # YZ: REWARD CHANGE 1
-GOAL_SUCCESS2_REWARD = 30   # reward for finding another object
+GOAL2_SUCCESS_REWARD = 30   # reward for finding another object
 GOAL_SUCCESS_REWARD = 5     # reward for finding one object
 STEP_PENALTY = -0.01
 FAILED_ACTION_PENALTY = 0

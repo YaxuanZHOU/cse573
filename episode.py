@@ -3,7 +3,7 @@ import random
 import torch
 import time
 import sys
-from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS
+from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD    # YZ
 from environment import Environment
 from utils.net_util import gpuify
 
@@ -85,7 +85,10 @@ class Episode:
             if self.target[target_index] in visible_objects:
                 if self.target[target_index] not in self.targets_done:
                     self.targets_done.append(self.target[target_index])
-                    reward += GOAL_SUCCESS_REWARD
+                    if len(self.targets_done) == 1:
+                        reward += GOAL_SUCCESS_REWARD
+                    elif len(self.targets_done) == 2:
+                        reward += GOAL2_SUCCESS_REWARD
 
             # YZ: if all targets have been network-found
             if len(self.target) == len(self.targets_found):
