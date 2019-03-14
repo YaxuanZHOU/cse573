@@ -84,7 +84,6 @@ class Episode:
             # YZ: add (what is really) found target in memory
             objects = self._env.last_event.metadata['objects']
             visible_objects = [o['objectType'] for o in objects if o['visible']]
-            # YZ-comment: visible objects in current frame of the environment, eg. ['Cup','Bowl']
             if self.target[target_index] in visible_objects:
                 if self.target[target_index] not in self.targets_done:
                     self.targets_done.append(self.target[target_index])

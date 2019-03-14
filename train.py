@@ -81,7 +81,7 @@ def test(rank, args, create_shared_model, shared_model,
 
     random.seed(args.seed + rank)
     # scene = 'FloorPlan4_physics'#.format( 4 - (rank % (4-args.scenes)))
-    scene = 'FloorPlan{}_physics'.format((rank % args.scenes) + 1)   # YZ: change test scene to the same as train scene.
+    scene = 'FloorPlan{}_physics'.format(1)   # YZ: change test scene to the same as train scene.
     setproctitle.setproctitle('Test Agent: {}'.format(rank))
     gpu_id = args.gpu_ids[rank % len(args.gpu_ids)]
 
@@ -151,7 +151,7 @@ def a3c_loss(args, player, gpu_id):
     R = torch.zeros(1, 1)
     if not player.done:
         output = player.eval_at_state()
-        R = output.value.data
+        R = output.value.data   # YZ- comment: critic_out
 
     if gpu_id >= 0:
         with torch.cuda.device(gpu_id):
@@ -165,9 +165,9 @@ def a3c_loss(args, player, gpu_id):
         with torch.cuda.device(gpu_id):
             gae = gae.cuda()
     R = Variable(R)
-    for i in reversed(range(len(player.rewards))):
-        R = args.gamma * R + player.rewards[i]
-        advantage = R - player.values[i]
+    for i in reversed(range(len(player.rewards))):  # YZ - comment: reverse all previous steps in this episode.
+        R = args.gamma * R + player.rewards[i]   # YZ - comment: discount reward
+        advantage = R - player.values[i]    # YZ - comment: critic_out@last step - critic_out@i-th step
         value_loss = value_loss + 0.5 * advantage.pow(2)
 
         # Generalized Advantage Estimation
