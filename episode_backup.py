@@ -3,8 +3,8 @@ import random
 import torch
 import time
 import sys
-from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD, FAILED_ACTION_PENALTY   # YZ
-from environment import Environment
+from constants_backup import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD, FAILED_ACTION_PENALTY   # YZ
+from environment_backup import Environment
 from utils.net_util import gpuify
 
 

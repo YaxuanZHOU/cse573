@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from torch.autograd import Variable
 from model import ModelInput
 from utils.net_util import gpuify, resnet_input_transform
-from episode import Episode
+from episode_backup import Episode
 
 class A3CAgent:
     """ Base class for all actor-critic agents. """

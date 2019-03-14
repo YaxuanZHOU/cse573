@@ -3,7 +3,7 @@ import random
 from utils import flag_parser
 from utils import misc_util
 
-import episode
+import episode_backup
 
 
 
@@ -21,7 +21,7 @@ def main():
 
     # Start a new episode.
     total_reward = 0
-    ep = episode.Episode(args, gpu_id, 0)
+    ep = episode_backup.Episode(args, gpu_id, 0)
     ep.new_episode(args, scene)
     total_reward = 0
     
