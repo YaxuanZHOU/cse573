@@ -105,7 +105,7 @@ class A3CAgent:
         prob = F.softmax(model_output.policy, dim=1)
 
         if training:
-            # Sample the action.
+            # Sample the action on categorical distribution (special case of multinomial distr.: k=2,n=1).
             action = prob.multinomial(1).data
         else:
             # Take the best action.

@@ -67,7 +67,7 @@ def train(rank, args, create_shared_model, shared_model,
         for k in loss:
             loss[k] = loss[k].item()
         
-        # Log the data from the episode and reset the plyaer.
+        # Log the data from the episode and reset the player.
         if args.enable_logging:
             log_episode(player, res_queue, total_reward=total_reward, **loss)
             
@@ -80,7 +80,8 @@ def test(rank, args, create_shared_model, shared_model,
     """ Training loop for each agent. """
 
     random.seed(args.seed + rank)
-    scene = 'FloorPlan4_physics'#.format( 4 - (rank % (4-args.scenes)))     
+    # scene = 'FloorPlan4_physics'#.format( 4 - (rank % (4-args.scenes)))
+    scene = 'FloorPlan{}_physics'.format((rank % args.scenes) + 1)   # YZ: change test scene to the same as train scene.
     setproctitle.setproctitle('Test Agent: {}'.format(rank))
     gpu_id = args.gpu_ids[rank % len(args.gpu_ids)]
 
