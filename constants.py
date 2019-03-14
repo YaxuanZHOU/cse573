@@ -25,4 +25,4 @@ BASIC_ACTIONS = [MOVE_AHEAD, ROTATE_LEFT, ROTATE_RIGHT, LOOK_UP, LOOK_DOWN, DONE
 GOAL2_SUCCESS_REWARD = 30   # reward for finding another object
 GOAL_SUCCESS_REWARD = 5     # reward for finding one object
 STEP_PENALTY = -0.01
-FAILED_ACTION_PENALTY = 0
+FAILED_ACTION_PENALTY = -0.1 # penalty for failed action

@@ -3,7 +3,7 @@ import random
 import torch
 import time
 import sys
-from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD    # YZ
+from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD, FAILED_ACTION_PENALTY   # YZ
 from environment import Environment
 from utils.net_util import gpuify
 
@@ -71,6 +71,9 @@ class Episode:
         reward = STEP_PENALTY 
         done = False
         action_was_successful = self.environment.last_action_success
+
+        if not action_was_successful:
+            reward -= FAILED_ACTION_PENALTY
 
         if action['action'] in range(len(self.target)):
             target_index = action['action']
