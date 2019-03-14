@@ -58,7 +58,7 @@ class Episode:
 
         return reward, terminal, action_was_successful
 
-    def slow_replay(self, delay=0.2):
+    def slow_replay(self, delay=0.5):
         # Reset the episode
         self._env.reset(self.cur_scene, change_seed=False)
 

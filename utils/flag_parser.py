@@ -129,7 +129,7 @@ def parse_arguments():
     parser.add_argument(
         '--num-test-episodes',
         type=float,
-        default=1000,
+        default=5,
         help='maximum # of episodes')
 
     parser.add_argument(
