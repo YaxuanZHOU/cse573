@@ -73,7 +73,7 @@ class Episode:
         action_was_successful = self.environment.last_action_success
 
         if not action_was_successful:
-            reward -= FAILED_ACTION_PENALTY
+            reward += FAILED_ACTION_PENALTY
 
         if action['action'] in range(len(self.target)):
             target_index = action['action']
