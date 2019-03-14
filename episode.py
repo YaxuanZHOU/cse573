@@ -3,13 +3,15 @@ import random
 import torch
 import time
 import sys
-from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD, FAILED_ACTION_PENALTY   # YZ
+from constants import GOAL_SUCCESS_REWARD, STEP_PENALTY, BASIC_ACTIONS, GOAL2_SUCCESS_REWARD, \
+    FAILED_ACTION_PENALTY  # YZ
 from environment import Environment
 from utils.net_util import gpuify
 
 
 class Episode:
     """ Episode for Navigation. """
+
     def __init__(self, args, gpu_id, rank, strict_done=False):
         super(Episode, self).__init__()
 
@@ -27,12 +29,11 @@ class Episode:
             int_objects = [s.strip() for s in f.readlines()]
         with open('./datasets/objects/rec_objects.txt') as f:
             rec_objects = [s.strip() for s in f.readlines()]
-        
+
         self.objects = int_objects + rec_objects
 
-        self.actions_list = [{'action':a} for a in BASIC_ACTIONS]
+        self.actions_list = [{'action': a} for a in BASIC_ACTIONS]
         self.actions_taken = []
-
 
     @property
     def environment(self):
@@ -59,16 +60,16 @@ class Episode:
 
     def slow_replay(self, delay=0.2):
         # Reset the episode
-        self._env.reset(self.cur_scene, change_seed = False)
-        
+        self._env.reset(self.cur_scene, change_seed=False)
+
         for action in self.actions_taken:
             self.action_step(action)
             time.sleep(delay)
-    
+
     def judge(self, action):
         """ Judge the last event. """
         # immediate reward
-        reward = STEP_PENALTY 
+        reward = STEP_PENALTY
         done = False
         action_was_successful = self.environment.last_action_success
 
@@ -102,31 +103,31 @@ class Episode:
         return reward, done, action_was_successful
 
     def new_episode(self, args, scene):
-        
+
         if self._env is None:
             if args.arch == 'osx':
                 local_executable_path = './datasets/builds/thor-local-OSXIntel64.app/Contents/MacOS/thor-local-OSXIntel64'
             else:
                 local_executable_path = './datasets/builds/thor-local-Linux64'
-            
+
             self._env = Environment(
-                    grid_size=args.grid_size,
-                    fov=args.fov,
-                    local_executable_path=local_executable_path,
-                    randomize_objects=args.randomize_objects,
-                    seed=self.seed)
+                grid_size=args.grid_size,
+                fov=args.fov,
+                local_executable_path=local_executable_path,
+                randomize_objects=args.randomize_objects,
+                seed=self.seed)
             self._env.start(scene, self.gpu_id)
         else:
             self._env.reset(scene)
 
         # For now, single target.
-        self.target = ['Tomato', 'Bowl']    # YZ-revised from: self.target = 'Tomato'
+        self.target = ['Tomato', 'Bowl']  # YZ-revised from: self.target = 'Tomato'
 
         self.success = False
         self.cur_scene = scene
         self.actions_taken = []
 
-        self.targets_found = []     # YZ-add memory for network-found targets within current episode.
-        self.targets_done = []      # YZ-add memory for really-found targets within current episode.
+        self.targets_found = []  # YZ-add memory for network-found targets within current episode.
+        self.targets_done = []  # YZ-add memory for really-found targets within current episode.
 
         return True
